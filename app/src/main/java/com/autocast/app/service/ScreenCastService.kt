@@ -7,6 +7,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.projection.MediaProjection
@@ -44,10 +45,19 @@ class ScreenCastService : Service() {
         when (intent?.action) {
             ACTION_START -> {
                 val resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, Activity.RESULT_CANCELED)
-                val resultData = intent.getParcelableExtra<Intent>(EXTRA_RESULT_DATA)
+                val resultData: Intent? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(EXTRA_RESULT_DATA, Intent::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(EXTRA_RESULT_DATA)
+                }
                 if (resultCode == Activity.RESULT_OK && resultData != null) {
                     startForegroundServiceWithNotification()
-                    startScreenCapture(resultCode, resultData)
+                    try {
+                        startScreenCapture(resultCode, resultData)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
             ACTION_STOP -> {
@@ -66,14 +76,31 @@ class ScreenCastService : Service() {
             .setContentText("Streaming device content to Android Auto")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
             .build()
 
-        startForeground(NOTIFICATION_ID, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+            )
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
     }
 
     private fun startScreenCapture(resultCode: Int, resultData: Intent) {
         val projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         mediaProjection = projectionManager.getMediaProjection(resultCode, resultData)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            mediaProjection?.registerCallback(object : MediaProjection.Callback() {
+                override fun onStop() {
+                    stopScreenCapture()
+                }
+            }, null)
+        }
 
         val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val metrics = DisplayMetrics()
@@ -83,24 +110,27 @@ class ScreenCastService : Service() {
         val width = metrics.widthPixels
         val height = metrics.heightPixels
 
-        // Virtual display setup for stream output
         virtualDisplay = mediaProjection?.createVirtualDisplay(
             "AutoCastStream",
             width,
             height,
             density,
             DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            null, // Surface target set during connection
+            null,
             null,
             null
         )
     }
 
     private fun stopScreenCapture() {
-        virtualDisplay?.release()
-        virtualDisplay = null
-        mediaProjection?.stop()
-        mediaProjection = null
+        try {
+            virtualDisplay?.release()
+            virtualDisplay = null
+            mediaProjection?.stop()
+            mediaProjection = null
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun createNotificationChannel() {

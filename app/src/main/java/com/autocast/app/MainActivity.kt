@@ -1,7 +1,9 @@
 package com.autocast.app
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
@@ -9,32 +11,47 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.autocast.app.databinding.ActivityMainBinding
 import com.autocast.app.service.ScreenCastService
-import com.autocast.app.touch.TouchInputService
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var isServiceRunning = false
 
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            launchMediaProjectionPermission()
+        } else {
+            Toast.makeText(this, "Notification permission required for casting", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private val mediaProjectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK && result.data != null) {
-            val serviceIntent = Intent(this, ScreenCastService::class.java).apply {
-                action = ScreenCastService.ACTION_START
-                putExtra(ScreenCastService.EXTRA_RESULT_CODE, result.resultCode)
-                putExtra(ScreenCastService.EXTRA_RESULT_DATA, result.data)
+            try {
+                val serviceIntent = Intent(this, ScreenCastService::class.java).apply {
+                    action = ScreenCastService.ACTION_START
+                    putExtra(ScreenCastService.EXTRA_RESULT_CODE, result.resultCode)
+                    putExtra(ScreenCastService.EXTRA_RESULT_DATA, result.data)
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent)
+                } else {
+                    startService(serviceIntent)
+                }
+                isServiceRunning = true
+                updateUIState()
+                Toast.makeText(this, "Screen Casting Started for Android Auto", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this, "Error starting cast service: ${e.message}", Toast.LENGTH_LONG).show()
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(serviceIntent)
-            } else {
-                startService(serviceIntent)
-            }
-            isServiceRunning = true
-            updateUIState()
-            Toast.makeText(this, "Screen Casting Started for Android Auto", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, "MediaProjection permission denied", Toast.LENGTH_SHORT).show()
         }
@@ -63,8 +80,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (installer != "com.android.vending") {
-            binding.tvStatus.text = "Notice: App installed directly (not via Play Store)"
-            binding.tvActiveMode.text = "Tip: Sideload via KingInstaller or ADB with -i com.android.vending to guarantee icon appears in Hyundai AA drawer"
+            binding.tvStatus.text = "Notice: Installed directly"
+            binding.tvActiveMode.text = "Tip: Sideload via KingInstaller or ADB with -i com.android.vending"
         }
     }
 
@@ -88,7 +105,7 @@ class MainActivity : AppCompatActivity() {
             if (isServiceRunning) {
                 stopScreenCastService()
             } else {
-                startScreenCastPermissionCheck()
+                checkPermissionsAndStart()
             }
         }
 
@@ -99,7 +116,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startScreenCastPermissionCheck() {
+    private fun checkPermissionsAndStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                return
+            }
+        }
+        launchMediaProjectionPermission()
+    }
+
+    private fun launchMediaProjectionPermission() {
         val projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         mediaProjectionLauncher.launch(projectionManager.createScreenCaptureIntent())
     }
