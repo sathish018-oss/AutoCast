@@ -2,10 +2,8 @@ package com.autocast.app.ui
 
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
-import androidx.car.app.model.Action
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
-import androidx.car.app.model.ParkedOnlyOnClickListener
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
 import com.autocast.app.service.ScreenCastService
@@ -64,7 +62,6 @@ class AutoCastScreen(carContext: CarContext) : Screen(carContext) {
         return ListTemplate.Builder()
             .setTitle("AutoCast Pro")
             .setSingleList(listBuilder.build())
-            .setHeaderAction(Action.APP_ICON)
             .build()
     }
 }
