@@ -3,12 +3,8 @@ package com.autocast.app.ui
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
-import androidx.car.app.model.CarColor
-import androidx.car.app.model.CarIcon
-import androidx.car.app.model.Item
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
-import androidx.car.app.model.MessageTemplate
 import androidx.car.app.model.ParkedOnlyOnClickListener
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
@@ -18,67 +14,55 @@ class AutoCastScreen(carContext: CarContext) : Screen(carContext) {
 
     override fun onGetTemplate(): Template {
         val currentMode = if (ScreenCastService.activeMode == ScreenCastService.MODE_YOUTUBE) {
-            "YouTube Player"
+            "YouTube Player UI"
         } else {
-            "Screen Mirroring"
+            "Full Device Mirroring"
         }
 
         val listBuilder = ItemList.Builder()
 
-        // Mode Indicator & Quick Switch Row
+        // Mode Switcher Row
         listBuilder.addItem(
             Row.Builder()
-                .setTitle("Streaming Mode: $currentMode")
-                .addText("Tap to switch between YouTube Widescreen Player & Full Device Mirroring")
-                .setOnClickListener(ParkedOnlyOnClickListener.create {
+                .setTitle("Active Mode: $currentMode")
+                .addText("Tap to toggle YouTube Widescreen Player / Screen Mirroring")
+                .setOnClickListener {
                     ScreenCastService.activeMode = if (ScreenCastService.activeMode == ScreenCastService.MODE_YOUTUBE) {
                         ScreenCastService.MODE_SCREEN_CAST
                     } else {
                         ScreenCastService.MODE_YOUTUBE
                     }
                     invalidate()
-                })
+                }
                 .build()
         )
 
-        // YouTube Control Deck
+        // YouTube Widescreen Player Deck
         listBuilder.addItem(
             Row.Builder()
-                .setTitle("YouTube Widescreen Player Deck")
-                .addText("Play / Pause & control YouTube playback on car display")
-                .setOnClickListener(ParkedOnlyOnClickListener.create {
+                .setTitle("YouTube Widescreen Player")
+                .addText("Tap to launch YouTube HTML5 Player on car display")
+                .setOnClickListener {
                     ScreenCastService.activeMode = ScreenCastService.MODE_YOUTUBE
                     invalidate()
-                })
+                }
                 .build()
         )
 
-        // Full Screen Mirroring Row
+        // Full Device Screen Mirroring Row
         listBuilder.addItem(
             Row.Builder()
                 .setTitle("Full Device Screen Mirroring")
-                .addText("Mirror phone display & audio to car screen (Low Latency H.264)")
-                .setOnClickListener(ParkedOnlyOnClickListener.create {
+                .addText("Tap to mirror phone screen & audio in real-time")
+                .setOnClickListener {
                     ScreenCastService.activeMode = ScreenCastService.MODE_SCREEN_CAST
                     invalidate()
-                })
-                .build()
-        )
-
-        // Quick Seek Controls
-        listBuilder.addItem(
-            Row.Builder()
-                .setTitle("Video Navigation")
-                .addText("10s Rewind | 10s Fast-Forward")
-                .setOnClickListener(ParkedOnlyOnClickListener.create {
-                    // Action triggered
-                    invalidate()
-                })
+                }
                 .build()
         )
 
         return ListTemplate.Builder()
-            .setTitle("AutoCast - Media Stream")
+            .setTitle("AutoCast Pro")
             .setSingleList(listBuilder.build())
             .setHeaderAction(Action.APP_ICON)
             .build()
