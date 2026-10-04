@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AutoCast</string>
+    <string name="accessibility_description">AutoCast touch passthrough for controlling YouTube &amp; Screen Cast on Android Auto display.</string>
+    <string name="start_mirroring">Start Screen Mirroring</string>
+    <string name="stop_mirroring">Stop Screen Mirroring</string>
+    <string name="youtube_mode">YouTube Player Mode</string>
+    <string name="screen_mirror_mode">Full Screen Mirroring</string>
+    <string name="aa_dev_instructions">Android Auto Developer Setup:\n1. Open Android Auto settings on your phone.\n2. Scroll down to Version and tap 10 times to enable Developer Mode.\n3. Tap top-right menu -> Developer Settings -> Enable \'Unknown Sources\'.\n4. Connect phone via USB or Wireless Android Auto.</string>
+</resources>
