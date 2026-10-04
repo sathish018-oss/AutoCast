@@ -29,9 +29,10 @@
             android:name="androidx.car.app.minCarApiLevel"
             android:value="1" />
 
+        <!-- Category Metadata -->
         <meta-data
             android:name="androidx.car.app.category"
-            android:value="navigation|media" />
+            android:value="poi" />
 
         <!-- Companion Phone Activity -->
         <activity
@@ -43,26 +44,22 @@
             </intent-filter>
         </activity>
 
-        <!-- Android Auto CarAppService -->
+        <!-- Android Auto CarAppService (POI Category Template Engine) -->
         <service
             android:name=".service.AutoCastCarAppService"
             android:exported="true">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="androidx.car.app.category.NAVIGATION" />
-                <category android:name="androidx.car.app.category.MEDIA" />
                 <category android:name="androidx.car.app.category.POI" />
             </intent-filter>
         </service>
 
-        <!-- Legacy Android Auto MediaBrowserService Fallback -->
+        <!-- Legacy MediaBrowserService Fallback -->
         <service
             android:name=".service.AutoCastMediaService"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
-                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </service>
 
