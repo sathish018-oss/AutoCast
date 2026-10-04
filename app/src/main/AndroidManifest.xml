@@ -29,7 +29,6 @@
             android:name="androidx.car.app.minCarApiLevel"
             android:value="1" />
 
-        <!-- Category Metadata for AA launcher visibility -->
         <meta-data
             android:name="androidx.car.app.category"
             android:value="navigation|media" />
@@ -53,6 +52,15 @@
                 <category android:name="androidx.car.app.category.NAVIGATION" />
                 <category android:name="androidx.car.app.category.MEDIA" />
                 <category android:name="androidx.car.app.category.POI" />
+            </intent-filter>
+        </service>
+
+        <!-- Legacy Android Auto MediaBrowserService Fallback -->
+        <service
+            android:name=".service.AutoCastMediaService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
 

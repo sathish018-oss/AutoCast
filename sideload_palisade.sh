@@ -1,23 +1,30 @@
 #!/usr/bin/env bash
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ADB_BIN="$SCRIPT_DIR/platform-tools/adb"
+
 echo "=========================================================="
 echo " AutoCast Pro - Sideload Helper for 2023 Hyundai Palisade"
 echo "=========================================================="
 echo ""
 
-if ! command -v adb &> /dev/null; then
-    echo "ERROR: adb command not found. Make sure Android Platform Tools is installed."
-    echo "Alternative: Install KingInstaller on your phone, select app-debug.apk, and tap Install as KingInstaller."
-    exit 1
+if [ ! -f "$ADB_BIN" ]; then
+    ADB_BIN="adb"
 fi
 
+echo "Checking connected Android phones..."
+$ADB_BIN devices
+
+echo ""
 echo "Installing AutoCast Pro with Play Store installer identity (com.android.vending)..."
-adb install -i com.android.vending -r AutoCast-Debug-APK/app-debug.apk
+$ADB_BIN install -i com.android.vending -r "$SCRIPT_DIR/AutoCast-Debug-APK/app-debug.apk"
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "SUCCESS! AutoCast Pro installed with Play Store package manager identity."
-    echo "Now connect your phone to your 2023 Hyundai Palisade via USB/Wireless Android Auto!"
+    echo "=========================================================="
+    echo " SUCCESS! AutoCast Pro installed with Play Store identity."
+    echo " Now connect your phone to your 2023 Hyundai Palisade!"
+    echo "=========================================================="
 else
     echo ""
-    echo "Installation failed. Make sure USB Debugging is enabled on your phone."
+    echo "Notice: Make sure your phone is plugged in via USB and USB Debugging is ON."
 fi
