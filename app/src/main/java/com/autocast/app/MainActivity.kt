@@ -45,8 +45,27 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        checkInstallerPackage()
         setupListeners()
         updateUIState()
+    }
+
+    private fun checkInstallerPackage() {
+        val installer = try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                packageManager.getInstallSourceInfo(packageName).installingPackageName
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getInstallerPackageName(packageName)
+            }
+        } catch (e: Exception) {
+            null
+        }
+
+        if (installer != "com.android.vending") {
+            binding.tvStatus.text = "Notice: App installed directly (not via Play Store)"
+            binding.tvActiveMode.text = "Tip: Sideload via KingInstaller or ADB with -i com.android.vending to guarantee icon appears in Hyundai AA drawer"
+        }
     }
 
     private fun setupListeners() {

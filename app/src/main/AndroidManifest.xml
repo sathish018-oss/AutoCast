@@ -29,7 +29,12 @@
             android:name="androidx.car.app.minCarApiLevel"
             android:value="1" />
 
-        <!-- Phone UI Activity -->
+        <!-- Category Metadata for AA launcher visibility -->
+        <meta-data
+            android:name="androidx.car.app.category"
+            android:value="navigation|media" />
+
+        <!-- Companion Phone Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -45,7 +50,9 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
+                <category android:name="androidx.car.app.category.NAVIGATION" />
                 <category android:name="androidx.car.app.category.MEDIA" />
+                <category android:name="androidx.car.app.category.POI" />
             </intent-filter>
         </service>
 
