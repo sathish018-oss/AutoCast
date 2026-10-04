@@ -32,7 +32,7 @@
         <!-- Category Metadata -->
         <meta-data
             android:name="androidx.car.app.category"
-            android:value="poi" />
+            android:value="media" />
 
         <!-- Companion Phone Activity -->
         <activity
@@ -44,13 +44,13 @@
             </intent-filter>
         </activity>
 
-        <!-- Android Auto CarAppService (POI Category Template Engine) -->
+        <!-- Android Auto CarAppService (Media Category for Launcher Visibility + Instant Loading) -->
         <service
             android:name=".service.AutoCastCarAppService"
             android:exported="true">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
-                <category android:name="androidx.car.app.category.POI" />
+                <category android:name="androidx.car.app.category.MEDIA" />
             </intent-filter>
         </service>
 
