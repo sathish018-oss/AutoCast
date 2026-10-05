@@ -50,6 +50,7 @@ class AutoCastMediaService : MediaBrowserServiceCompat() {
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onPlay() {
                     updatePlaybackState(PlaybackStateCompat.STATE_PLAYING)
+                    ScreenCastService.loadUrlInPresentation("https://m.youtube.com")
                 }
 
                 override fun onPause() {
@@ -62,6 +63,7 @@ class AutoCastMediaService : MediaBrowserServiceCompat() {
                             ScreenCastService.activeMode = ScreenCastService.MODE_YOUTUBE
                             updateMetadata("YouTube Widescreen Player", "Streaming YouTube HD")
                             updatePlaybackState(PlaybackStateCompat.STATE_PLAYING)
+                            ScreenCastService.loadUrlInPresentation("https://m.youtube.com")
                         }
                         "mirror_mode" -> {
                             ScreenCastService.activeMode = ScreenCastService.MODE_SCREEN_CAST
