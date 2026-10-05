@@ -53,7 +53,7 @@ class AutoCastPresentation(
 
     fun loadUrl(url: String) {
         if (::webView.isInitialized) {
-            post {
+            webView.post {
                 webView.loadUrl(url)
             }
         }
