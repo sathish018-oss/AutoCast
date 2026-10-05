@@ -196,8 +196,17 @@ class MainActivity : AppCompatActivity() {
         binding.youtubeWebView.loadUrl(targetUrl)
         ScreenCastService.loadUrlInPresentation(targetUrl)
     }
-
     private fun checkPermissionsAndStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName")
+            )
+            startActivity(intent)
+            Toast.makeText(this, "Please grant 'Display over other apps' to stream video to your car", Toast.LENGTH_LONG).show()
+            return
+        }
+
         if (!audioAsked && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED) {
             audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)

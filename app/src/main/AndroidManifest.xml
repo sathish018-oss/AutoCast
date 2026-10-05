@@ -8,8 +8,6 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="androidx.car.app.NAVIGATION_TEMPLATES" />
-    <uses-permission android:name="androidx.car.app.ACCESS_SURFACE" />
     <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" tools:ignore="ProtectedPermissions" />
 
     <application
@@ -35,7 +33,7 @@
         <!-- Category Metadata -->
         <meta-data
             android:name="androidx.car.app.category"
-            android:value="navigation" />
+            android:value="media" />
 
         <!-- Companion Phone Activity -->
         <activity
@@ -47,17 +45,23 @@
             </intent-filter>
         </activity>
 
-        <!-- Android Auto CarAppService (Media Category for Launcher Visibility + Instant Loading) -->
+        <!-- Android Auto CarAppService -->
         <service
             android:name=".service.AutoCastCarAppService"
             android:exported="true">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
-                <category android:name="androidx.car.app.category.NAVIGATION" />
+                <category android:name="androidx.car.app.category.MEDIA" />
             </intent-filter>
-            <meta-data
-                android:name="androidx.car.app.TOUCH_ENABLED"
-                android:value="true" />
+        </service>
+
+        <!-- MediaBrowserService -->
+        <service
+            android:name=".service.AutoCastMediaService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
         </service>
 
         <!-- MediaProjection Screen Cast Foreground Service -->
