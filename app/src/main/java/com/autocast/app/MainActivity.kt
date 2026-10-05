@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 isServiceRunning = true
                 updateUIState()
-                Toast.makeText(this, "Screen Casting Active - Streaming to Android Auto", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Screen Casting Active - Streaming Video to Android Auto", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(this, "Error starting cast service: ${e.message}", Toast.LENGTH_LONG).show()
@@ -93,6 +93,9 @@ class MainActivity : AppCompatActivity() {
             webChromeClient = WebChromeClient()
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                    request?.url?.toString()?.let { url ->
+                        ScreenCastService.loadUrlInPresentation(url)
+                    }
                     return false
                 }
             }
@@ -144,7 +147,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnHome.setOnClickListener {
-            binding.youtubeWebView.loadUrl("https://m.youtube.com")
+            val targetUrl = "https://m.youtube.com"
+            binding.youtubeWebView.loadUrl(targetUrl)
+            ScreenCastService.loadUrlInPresentation(targetUrl)
         }
 
         binding.btnAccessibilityPermission.setOnClickListener {
@@ -156,12 +161,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun performYouTubeSearch() {
         val query = binding.etSearchQuery.text.toString().trim()
-        if (query.isNotEmpty()) {
+        val targetUrl = if (query.isNotEmpty()) {
             val encodedQuery = URLEncoder.encode(query, "UTF-8")
-            binding.youtubeWebView.loadUrl("https://m.youtube.com/results?search_query=$encodedQuery")
+            "https://m.youtube.com/results?search_query=$encodedQuery"
         } else {
-            binding.youtubeWebView.loadUrl("https://m.youtube.com")
+            "https://m.youtube.com"
         }
+        binding.youtubeWebView.loadUrl(targetUrl)
+        ScreenCastService.loadUrlInPresentation(targetUrl)
     }
 
     private fun checkPermissionsAndStart() {

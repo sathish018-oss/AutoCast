@@ -15,11 +15,15 @@ import android.media.ImageReader
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.DisplayMetrics
+import android.view.Display
 import android.view.WindowManager
 import androidx.core.app.NotificationCompat
 import com.autocast.app.R
+import com.autocast.app.presentation.AutoCastPresentation
 
 class ScreenCastService : Service() {
 
@@ -36,13 +40,40 @@ class ScreenCastService : Service() {
         const val MODE_SCREEN_CAST = 1
 
         var activeMode: Int = MODE_YOUTUBE
+        var activePresentation: AutoCastPresentation? = null
+
+        fun loadUrlInPresentation(url: String) {
+            activePresentation?.loadUrl(url)
+        }
     }
 
     private var mediaProjection: MediaProjection? = null
     private var virtualDisplay: VirtualDisplay? = null
     private var imageReader: ImageReader? = null
+    private lateinit var displayManager: DisplayManager
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    private val displayListener = object : DisplayManager.DisplayListener {
+        override fun onDisplayAdded(displayId: Int) {
+            checkAndShowPresentation()
+        }
+
+        override fun onDisplayRemoved(displayId: Int) {
+            if (activePresentation?.display?.displayId == displayId) {
+                dismissPresentation()
+            }
+        }
+
+        override fun onDisplayChanged(displayId: Int) {}
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+        displayManager.registerDisplayListener(displayListener, mainHandler)
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
@@ -61,10 +92,12 @@ class ScreenCastService : Service() {
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
+                    checkAndShowPresentation()
                 }
             }
             ACTION_STOP -> {
                 stopScreenCapture()
+                dismissPresentation()
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
@@ -127,6 +160,36 @@ class ScreenCastService : Service() {
         )
     }
 
+    private fun checkAndShowPresentation() {
+        val displays = displayManager.displays
+        for (display in displays) {
+            if (display.displayId != Display.DEFAULT_DISPLAY) {
+                mainHandler.post {
+                    try {
+                        activePresentation?.dismiss()
+                        val presentation = AutoCastPresentation(this, display)
+                        presentation.show()
+                        activePresentation = presentation
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                break
+            }
+        }
+    }
+
+    private fun dismissPresentation() {
+        mainHandler.post {
+            try {
+                activePresentation?.dismiss()
+                activePresentation = null
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     private fun stopScreenCapture() {
         try {
             virtualDisplay?.release()
@@ -138,6 +201,12 @@ class ScreenCastService : Service() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    override fun onDestroy() {
+        displayManager.unregisterDisplayListener(displayListener)
+        dismissPresentation()
+        super.onDestroy()
     }
 
     private fun createNotificationChannel() {

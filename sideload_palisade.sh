@@ -15,8 +15,11 @@ echo "Checking connected Android phones..."
 $ADB_BIN devices
 
 echo ""
+echo "Uninstalling existing version (if any) to prevent signature mismatch..."
+$ADB_BIN uninstall com.autocast.app > /dev/null 2>&1 || true
+
 echo "Installing AutoCast Pro with Play Store installer identity (com.android.vending)..."
-$ADB_BIN install -i com.android.vending -r "$SCRIPT_DIR/AutoCast-Debug-APK/app-debug.apk"
+$ADB_BIN install -i com.android.vending "$SCRIPT_DIR/AutoCast-Debug-APK/app-debug.apk"
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -26,5 +29,5 @@ if [ $? -eq 0 ]; then
     echo "=========================================================="
 else
     echo ""
-    echo "Notice: Make sure your phone is plugged in via USB and USB Debugging is ON."
+    echo "Notice: Make sure your phone is plugged in via USB with USB Debugging enabled."
 fi
