@@ -20,6 +20,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.Display
+import android.view.WindowManager
 import androidx.core.app.NotificationCompat
 import com.autocast.app.R
 import com.autocast.app.presentation.AutoCastPresentation
