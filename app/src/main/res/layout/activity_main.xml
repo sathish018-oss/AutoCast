@@ -153,7 +153,7 @@
             android:padding="24dp" />
     </FrameLayout>
 
-    <!-- Accessibility / Touch Passthrough Quick Access -->
+    <!-- System Permission Controls -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -161,23 +161,35 @@
         android:gravity="center_vertical">
 
         <Button
+            android:id="@+id/btnOverlayPermission"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:text="Grant Overlay Permission"
+            android:textColor="@color/teal_200"
+            android:textSize="11sp" />
+
+        <Button
             android:id="@+id/btnAccessibilityPermission"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="38dp"
             android:layout_weight="1"
-            android:text="Enable Touch Passthrough"
+            android:layout_marginStart="4dp"
+            android:text="Touch Passthrough"
             android:textColor="@color/teal_200"
             android:textSize="11sp" />
-
-        <TextView
-            android:id="@+id/tvActiveMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="Mode: YouTube Widescreen"
-            android:textColor="#AAAAAA"
-            android:textSize="11sp" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvActiveMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mode: YouTube Widescreen"
+        android:textColor="#AAAAAA"
+        android:textSize="11sp"
+        android:gravity="center"
+        android:layout_marginTop="4dp" />
 
 </LinearLayout>

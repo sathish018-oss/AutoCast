@@ -3,8 +3,10 @@ package com.autocast.app.presentation
 import android.annotation.SuppressLint
 import android.app.Presentation
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.Display
+import android.view.WindowManager
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -20,6 +22,15 @@ class AutoCastPresentation(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // CRITICAL FOR SERVICES: Set TYPE_APPLICATION_OVERLAY window type so WindowManager permits Presentation from Service context!
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            window?.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY)
+        } else {
+            @Suppress("DEPRECATION")
+            window?.setType(WindowManager.LayoutParams.TYPE_PHONE)
+        }
+
         setContentView(R.layout.presentation_layout)
 
         webView = findViewById(R.id.presentationWebView)

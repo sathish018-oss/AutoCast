@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 isServiceRunning = true
                 updateUIState()
-                Toast.makeText(this, "Screen Casting Active - Streaming Video to Android Auto", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Screen Casting Active - Video Streaming to Car", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(this, "Error starting cast service: ${e.message}", Toast.LENGTH_LONG).show()
@@ -152,6 +153,21 @@ class MainActivity : AppCompatActivity() {
             ScreenCastService.loadUrlInPresentation(targetUrl)
         }
 
+        binding.btnOverlayPermission.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (!Settings.canDrawOverlays(this)) {
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    )
+                    startActivity(intent)
+                    Toast.makeText(this, "Enable 'Display over other apps' for AutoCast", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "Overlay permission already granted!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         binding.btnAccessibilityPermission.setOnClickListener {
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             startActivity(intent)
@@ -172,6 +188,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPermissionsAndStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName")
+            )
+            startActivity(intent)
+            Toast.makeText(this, "Please grant 'Display over other apps' to stream video to your car", Toast.LENGTH_LONG).show()
+            return
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {

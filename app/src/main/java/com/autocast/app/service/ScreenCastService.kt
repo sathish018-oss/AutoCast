@@ -161,20 +161,20 @@ class ScreenCastService : Service() {
     }
 
     private fun checkAndShowPresentation() {
-        val displays = displayManager.displays
-        for (display in displays) {
-            if (display.displayId != Display.DEFAULT_DISPLAY) {
-                mainHandler.post {
-                    try {
-                        activePresentation?.dismiss()
-                        val presentation = AutoCastPresentation(this, display)
-                        presentation.show()
-                        activePresentation = presentation
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+        val targetDisplay = virtualDisplay?.display ?: run {
+            displayManager.displays.firstOrNull { it.displayId != Display.DEFAULT_DISPLAY }
+        }
+
+        if (targetDisplay != null) {
+            mainHandler.post {
+                try {
+                    activePresentation?.dismiss()
+                    val presentation = AutoCastPresentation(this, targetDisplay)
+                    presentation.show()
+                    activePresentation = presentation
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-                break
             }
         }
     }
