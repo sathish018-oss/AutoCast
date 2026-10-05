@@ -1,6 +1,7 @@
 package com.autocast.app
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,12 +9,19 @@ import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.autocast.app.databinding.ActivityMainBinding
 import com.autocast.app.service.ScreenCastService
+import java.net.URLEncoder
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,7 +55,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 isServiceRunning = true
                 updateUIState()
-                Toast.makeText(this, "Screen Casting Started for Android Auto", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Screen Casting Active - Streaming to Android Auto", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(this, "Error starting cast service: ${e.message}", Toast.LENGTH_LONG).show()
@@ -62,26 +70,33 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        checkInstallerPackage()
+        setupYouTubeWebView()
         setupListeners()
         updateUIState()
     }
 
-    private fun checkInstallerPackage() {
-        val installer = try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                packageManager.getInstallSourceInfo(packageName).installingPackageName
-            } else {
-                @Suppress("DEPRECATION")
-                packageManager.getInstallerPackageName(packageName)
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupYouTubeWebView() {
+        binding.youtubeWebView.apply {
+            settings.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                databaseEnabled = true
+                mediaPlaybackRequiresUserGesture = false
+                useWideViewPort = true
+                loadWithOverviewMode = true
+                allowFileAccess = true
+                allowContentAccess = true
+                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                userAgentString = "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"
             }
-        } catch (e: Exception) {
-            null
-        }
-
-        if (installer != "com.android.vending") {
-            binding.tvStatus.text = "Notice: Installed directly"
-            binding.tvActiveMode.text = "Tip: Sideload via KingInstaller or ADB with -i com.android.vending"
+            webChromeClient = WebChromeClient()
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                    return false
+                }
+            }
+            loadUrl("https://m.youtube.com")
         }
     }
 
@@ -90,11 +105,17 @@ class MainActivity : AppCompatActivity() {
             if (isChecked) {
                 when (checkedId) {
                     R.id.btnYouTubeMode -> {
-                        binding.tvActiveMode.text = "Active Mode: YouTube Player UI"
+                        binding.tvActiveMode.text = "Mode: YouTube Widescreen"
+                        binding.youtubeBarLayout.visibility = View.VISIBLE
+                        binding.youtubeWebView.visibility = View.VISIBLE
+                        binding.tvScreenCastPlaceholder.visibility = View.GONE
                         ScreenCastService.activeMode = ScreenCastService.MODE_YOUTUBE
                     }
                     R.id.btnScreenCastMode -> {
-                        binding.tvActiveMode.text = "Active Mode: Full Screen Mirroring"
+                        binding.tvActiveMode.text = "Mode: Full Screen Mirroring"
+                        binding.youtubeBarLayout.visibility = View.GONE
+                        binding.youtubeWebView.visibility = View.GONE
+                        binding.tvScreenCastPlaceholder.visibility = View.VISIBLE
                         ScreenCastService.activeMode = ScreenCastService.MODE_SCREEN_CAST
                     }
                 }
@@ -109,10 +130,37 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        binding.btnSearch.setOnClickListener {
+            performYouTubeSearch()
+        }
+
+        binding.etSearchQuery.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                performYouTubeSearch()
+                true
+            } else {
+                false
+            }
+        }
+
+        binding.btnHome.setOnClickListener {
+            binding.youtubeWebView.loadUrl("https://m.youtube.com")
+        }
+
         binding.btnAccessibilityPermission.setOnClickListener {
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             startActivity(intent)
-            Toast.makeText(this, "Enable 'AutoCast Touch Service' for touch passthrough", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Enable 'AutoCast Touch Service' for car touch passthrough", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun performYouTubeSearch() {
+        val query = binding.etSearchQuery.text.toString().trim()
+        if (query.isNotEmpty()) {
+            val encodedQuery = URLEncoder.encode(query, "UTF-8")
+            binding.youtubeWebView.loadUrl("https://m.youtube.com/results?search_query=$encodedQuery")
+        } else {
+            binding.youtubeWebView.loadUrl("https://m.youtube.com")
         }
     }
 
@@ -149,6 +197,16 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.tvStatus.text = "Status: Ready to connect"
             binding.btnToggleService.text = getString(R.string.start_mirroring)
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (binding.youtubeWebView.visibility == View.VISIBLE && binding.youtubeWebView.canGoBack()) {
+            binding.youtubeWebView.goBack()
+        } else {
+            @Suppress("DEPRECATION")
+            super.onBackPressed()
         }
     }
 }

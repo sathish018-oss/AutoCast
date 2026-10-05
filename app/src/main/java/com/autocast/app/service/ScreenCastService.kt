@@ -8,8 +8,10 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.media.ImageReader
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Build
@@ -38,6 +40,7 @@ class ScreenCastService : Service() {
 
     private var mediaProjection: MediaProjection? = null
     private var virtualDisplay: VirtualDisplay? = null
+    private var imageReader: ImageReader? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -73,7 +76,7 @@ class ScreenCastService : Service() {
         createNotificationChannel()
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("AutoCast Active")
-            .setContentText("Streaming device content to Android Auto")
+            .setContentText("Streaming YouTube & device content to Android Auto")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
@@ -110,13 +113,15 @@ class ScreenCastService : Service() {
         val width = metrics.widthPixels
         val height = metrics.heightPixels
 
+        imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
+
         virtualDisplay = mediaProjection?.createVirtualDisplay(
             "AutoCastStream",
             width,
             height,
             density,
             DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            null,
+            imageReader?.surface,
             null,
             null
         )
@@ -126,6 +131,8 @@ class ScreenCastService : Service() {
         try {
             virtualDisplay?.release()
             virtualDisplay = null
+            imageReader?.close()
+            imageReader = null
             mediaProjection?.stop()
             mediaProjection = null
         } catch (e: Exception) {

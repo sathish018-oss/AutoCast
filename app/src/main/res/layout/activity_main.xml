@@ -1,160 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_background"
-    android:padding="16dp"
+    android:orientation="vertical"
+    android:padding="12dp"
     tools:context=".MainActivity">
 
+    <!-- App Title & Status Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
 
-        <!-- Title -->
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="AutoCast Pro"
             android:textColor="@color/white"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Stream YouTube &amp; Phone Screen to Android Auto"
-            android:textColor="#AAAAAA"
-            android:textSize="14sp"
-            android:layout_marginBottom="24dp" />
+            android:text="Status: Ready"
+            android:textColor="@color/teal_200"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-        <!-- Status Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/card_background"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/tvStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Status: Ready to connect"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvActiveMode"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Active Mode: YouTube Player"
-                    android:textColor="@color/teal_200"
-                    android:textSize="14sp"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Mode Selection Toggle -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select Streaming Mode"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp" />
+    <!-- Controls Row: Mode Toggle & Action Button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
 
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/toggleModeGroup"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:singleSelection="true"
-            app:checkedButton="@id/btnYouTubeMode"
-            android:layout_marginBottom="24dp">
+            app:checkedButton="@id/btnYouTubeMode">
 
             <Button
                 android:id="@+id/btnYouTubeMode"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="YouTube"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/btnScreenCastMode"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="Screen Cast"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="12sp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
-        <!-- Action Controls -->
         <Button
             android:id="@+id/btnToggleService"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
             android:text="@string/start_mirroring"
             android:backgroundTint="@color/red_youtube"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp" />
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- YouTube Search & Control Bar -->
+    <LinearLayout
+        android:id="@+id/youtubeBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp">
+
+        <EditText
+            android:id="@+id/etSearchQuery"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="#222222"
+            android:hint="Search YouTube videos..."
+            android:textColorHint="#888888"
+            android:textColor="@color/white"
+            android:paddingHorizontal="12dp"
+            android:textSize="13sp"
+            android:imeOptions="actionSearch"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginStart="6dp"
+            android:text="Search"
+            android:textSize="12sp"
+            android:backgroundTint="@color/red_youtube" />
+
+        <Button
+            android:id="@+id/btnHome"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:text="Home"
+            android:textSize="12sp"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <!-- YouTube Video Stream Container -->
+    <FrameLayout
+        android:id="@+id/streamContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#000000"
+        android:layout_marginBottom="8dp">
+
+        <WebView
+            android:id="@+id/youtubeWebView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tvScreenCastPlaceholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Screen Cast Active\n\nAll apps (YouTube app, Netflix, Chrome) opened on phone are now mirrored to Android Auto"
+            android:textColor="#CCCCCC"
+            android:textSize="15sp"
+            android:background="#111111"
+            android:visibility="gone"
+            android:padding="24dp" />
+    </FrameLayout>
+
+    <!-- Accessibility / Touch Passthrough Quick Access -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
         <Button
             android:id="@+id/btnAccessibilityPermission"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Enable Touch Passthrough (Accessibility)"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:text="Enable Touch Passthrough"
             android:textColor="@color/teal_200"
-            android:layout_marginBottom="24dp" />
+            android:textSize="11sp" />
 
-        <!-- Android Auto Developer Mode Setup Guide -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvActiveMode"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/card_background"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Android Auto Setup Guide"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/aa_dev_instructions"
-                    android:textColor="#CCCCCC"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="4dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
+            android:layout_marginStart="8dp"
+            android:text="Mode: YouTube Widescreen"
+            android:textColor="#AAAAAA"
+            android:textSize="11sp" />
     </LinearLayout>
-</ScrollView>
+
+</LinearLayout>
